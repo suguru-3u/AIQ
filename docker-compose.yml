@@ -1,0 +1,33 @@
+version: "3"
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${LOCAL_DATABASE_NAME}
+      MYSQL_USER: ${LOCAL_USER_NAME}
+      MYSQL_PASSWORD: ${LOCAL_USER_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  node-cli:
+    build: ./nodeCli/
+    tty: true
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    depends_on:
+      - db
+  node-api:
+    build: ./nodeApi/
+    tty: true
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
