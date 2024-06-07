@@ -1,0 +1,8 @@
+# cliで読み込むCSVファイル
+*.csv
+
+# dockerのDB情報
+/db/data/
+
+# cliのライブラリ
+/*/node_modules/
