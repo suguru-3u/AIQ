@@ -2,12 +2,28 @@ const mysql = require("mysql2/promise");
 
 class RDBClientFactory {
   constructor() {
+    const {
+      LOCAL_DB_HOST_NAME,
+      LOCAL_USER_NAME,
+      LOCAL_USER_PASSWORD,
+      LOCAL_DATABASE_NAME,
+      LOCAL_DB_PORT,
+    } = process.env;
+    if (
+      !LOCAL_DB_HOST_NAME ||
+      !LOCAL_USER_NAME ||
+      !LOCAL_USER_PASSWORD ||
+      !LOCAL_DATABASE_NAME ||
+      !LOCAL_DB_PORT
+    ) {
+      throw new Error("環境変数が設定されていません");
+    }
     this.dbConfig = {
-      host: process.env.LOCAL_DB_HOST_NAME,
-      user: process.env.LOCAL_USER_NAME,
-      password: process.env.LOCAL_USER_PASSWORD,
-      database: process.env.LOCAL_DATABASE_NAME,
-      port: process.env.LOCAL_DB_PORT,
+      host: LOCAL_DB_HOST_NAME,
+      user: LOCAL_USER_NAME,
+      password: LOCAL_USER_PASSWORD,
+      database: LOCAL_DATABASE_NAME,
+      port: LOCAL_DB_PORT,
       charset: "utf8mb4",
     };
     this.rdbClient = null;

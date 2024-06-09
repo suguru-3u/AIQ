@@ -1,7 +1,3 @@
-/**
- * 献立メニューのDB関連を記述しています
- */
-
 const RDBClientFactory = require("../config/rdb-client-factory.js");
 
 class InfluencerDatasource {
@@ -49,6 +45,27 @@ class InfluencerDatasource {
       const [results] = await this.#rdbClientFactory.rdbClient.query(
         insertIntoPostQuery,
         [query.metric, parseInt(query.limit, 10)]
+      );
+      console.log("データの取得が完了しました");
+
+      return results;
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+      throw new Error("データ取得中にエラーが発生しました");
+    } finally {
+      await this.#rdbClientFactory.closeConnection();
+    }
+  }
+
+  async getTextData() {
+    try {
+      await this.#rdbClientFactory.openConnection();
+      const getTextQuery = `
+        select influencer_id , body as text
+        from posts
+        order by INFLUENCER_ID;`;
+      const [results] = await this.#rdbClientFactory.rdbClient.query(
+        getTextQuery
       );
       console.log("データの取得が完了しました");
 
