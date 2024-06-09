@@ -14,32 +14,29 @@ jest.mock("../../infrastructure/datasource/influencer-datasource.js", () => {
 });
 
 describe("detail", () => {
-  test("正常系: パスパラメータが数値", async () => {
-    const influencerData = [
+  test("正常系", async () => {
+    const dbMockData = [
       {
         influencer_id: 2,
         likes: "551.7500",
         comments: "10.5000",
       },
     ];
-    const responseData = {
+    const responseMockData = {
       influencer_id: 2,
       likes: "551.7500",
       comments: "10.5000",
     };
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().detail.mockResolvedValueOnce(influencerData);
+    InfluencerDatasource().detail.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
     const response = await influencerService.detail(1);
-    expect(response).toEqual(responseData);
+    expect(response).toEqual(responseMockData);
   });
   test("正常系: インフルエンサーがいなかった", async () => {
-    const influencerData = [];
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().detail.mockResolvedValueOnce(influencerData);
+    const dbMockData = [];
+    InfluencerDatasource().detail.mockResolvedValueOnce(dbMockData);
     const influencerService = new InfluencerService();
-    // エラーが発生するかどうかを確認
     try {
       await influencerService.detail(1);
     } catch (error) {
@@ -51,17 +48,17 @@ describe("detail", () => {
 
 describe("getTopInfluencersByMetric", () => {
   test("正常系: metricがlikes", async () => {
-    const requestQuery = {
+    const requestMockQuery = {
       metric: "likes",
       limit: 1,
     };
-    const influencerData = [
+    const dbMockData = [
       {
-        influencer_id: 2,
+        influencerId: 2,
         metric: "551.7500",
       },
     ];
-    const responseData = [
+    const responseMockData = [
       {
         No: 1,
         influencerId: 2,
@@ -69,43 +66,42 @@ describe("getTopInfluencersByMetric", () => {
       },
     ];
     // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
+    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
-    const response = await influencerService.getTopInfluencersByMetric(requestQuery);
-    expect(response).toEqual(responseData);
+    const response = await influencerService.getTopInfluencersByMetric(requestMockQuery);
+    expect(response).toEqual(responseMockData);
   });
   test("正常系: metricがcomments", async () => {
-    const requestQuery = {
+    const requestMockQuery = {
       metric: "comments",
       limit: 1,
     };
-    const influencerData = [
+    const dbMockData = [
       {
-        influencer_id: 2,
+        influencerId: 2,
         metric: "551.7500",
       },
     ];
-    const responseData = [
+    const responseMockData = [
       {
         No: 1,
         influencerId: 2,
         comments: "551.7500",
       },
     ];
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
+    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
-    const response = await influencerService.getTopInfluencersByMetric(requestQuery);
-    expect(response).toEqual(responseData);
+    const response = await influencerService.getTopInfluencersByMetric(requestMockQuery);
+    expect(response).toEqual(responseMockData);
   });
 });
 
 describe("getTopNouns", () => {
   const dbMockData = [
     {
-      influencer_id: 2,
+      influencerId: 2,
       text:
         "．\n" +
         "👶🎉🎂\n" +
@@ -122,7 +118,7 @@ describe("getTopNouns", () => {
         "#cakewith_tokyo #halfbirthday #ハーフバースデー #誕生日ケーキ #生後6ヶ月 #男の子ベビー #バースデーケーキ #オーダーケーキ #男の子ママ #育児",
     },
     {
-      influencer_id: 2,
+      influencerId: 2,
       text:
         "．\n" +
         "マザーズバッグはリュックを使うことが多いけど、布製のものだったので雨の日に中身がしっとりしてしまい、防水がしっかりしている @gastonluga のものにしました🎒\n" +
@@ -134,44 +130,42 @@ describe("getTopNouns", () => {
         "#GastonLuga #ガストンルーガ #バックパック #CARRYYOURLIFEEFFORTLESSLY",
     },
     {
-      influencer_id: 3,
+      influencerId: 3,
       text: "#ママコーデ #ママファッション #大人コーデ",
     },
     {
-      influencer_id: 4,
+      influencerId: 4,
       text: "#IMUNNY #アイムユニ #コスメレポ #新作コスメ",
     },
   ];
-  test("正常系: metricがlikes", async () => {
-    const responseData = [
-      { influencer_id: "2", wordCount: [{ "#": 14 }] },
-      { influencer_id: "3", wordCount: [{ "#": 3 }] },
-      { influencer_id: "4", wordCount: [{ "#": 4 }] },
+  test("正常系: limitが1", async () => {
+    const responseMockData = [
+      { influencerId: "2", wordCount: [{ "#": 14 }] },
+      { influencerId: "3", wordCount: [{ "#": 3 }] },
+      { influencerId: "4", wordCount: [{ "#": 4 }] },
     ];
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
     InfluencerDatasource().getTextData.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
     const response = await influencerService.getTopNouns(1);
-    expect(response).toEqual(responseData);
+    expect(response).toEqual(responseMockData);
   });
-  test("正常系: metricがcomments", async () => {
-    const responseData = [
-      { influencer_id: "2", wordCount: [] },
-      { influencer_id: "3", wordCount: [] },
-      { influencer_id: "4", wordCount: [] },
+  test("正常系: limitが0", async () => {
+    const responseMockData = [
+      { influencerId: "2", wordCount: [] },
+      { influencerId: "3", wordCount: [] },
+      { influencerId: "4", wordCount: [] },
     ];
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
     InfluencerDatasource().getTextData.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
     const response = await influencerService.getTopNouns(0);
-    expect(response).toEqual(responseData);
+    expect(response).toEqual(responseMockData);
   });
-  test("正常系: metricがcomments", async () => {
-    const responseData = [
+  test("正常系: limitが10", async () => {
+    const responseMockData = [
       {
-        influencer_id: "2",
+        influencerId: "2",
         wordCount: [
           {
             "#": 14,
@@ -206,7 +200,7 @@ describe("getTopNouns", () => {
         ],
       },
       {
-        influencer_id: "3",
+        influencerId: "3",
         wordCount: [
           {
             "#": 3,
@@ -229,7 +223,7 @@ describe("getTopNouns", () => {
         ],
       },
       {
-        influencer_id: "4",
+        influencerId: "4",
         wordCount: [
           {
             "#": 4,
@@ -252,11 +246,10 @@ describe("getTopNouns", () => {
         ],
       },
     ];
-    // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
     InfluencerDatasource().getTextData.mockResolvedValueOnce(dbMockData);
 
     const influencerService = new InfluencerService();
     const response = await influencerService.getTopNouns(10);
-    expect(response).toEqual(responseData);
+    expect(response).toEqual(responseMockData);
   });
 });

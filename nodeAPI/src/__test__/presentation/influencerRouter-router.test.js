@@ -1,8 +1,8 @@
 const request = require("supertest");
 const cookMenuRouter = require("../../presentation/influencerRouter-router.js");
 const InfluencerService = require("../../application/influencer-service.js");
+const NotInfluencerError = require("../../error/not-influencer-error.js");
 
-// jest.mock()を使用してInfluencerServiceモジュールをモック化する
 jest.mock("../../application/influencer-service.js", () => {
   const mock = jest.fn();
   return jest.fn().mockImplementation(() => {
@@ -15,7 +15,7 @@ jest.mock("../../application/influencer-service.js", () => {
 });
 
 describe("GET /influencers/:id", () => {
-  test("正常系: パスパラメータが数値", async () => {
+  test("正常系: パスパラメータが0", async () => {
     const influencerData = {
       influencer_id: 2,
       likes: "551.7500",
@@ -29,7 +29,7 @@ describe("GET /influencers/:id", () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
-  test("正常系: パスパラメータが数値", async () => {
+  test("正常系: パスパラメータが1", async () => {
     const influencerData = {
       influencer_id: 2,
       likes: "551.7500",
@@ -43,7 +43,7 @@ describe("GET /influencers/:id", () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
-  test("正常系: パスパラメータが数値", async () => {
+  test("正常系: パスパラメータが100", async () => {
     const influencerData = {
       influencer_id: 2,
       likes: "551.7500",
@@ -57,37 +57,48 @@ describe("GET /influencers/:id", () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
-  test("異常系: パスパラメータが数値", async () => {
-    const message = { message: "インフルエンサー情報取得処理に失敗しました" };
+  test("異常系: インフルエンサーが存在しなかった", async () => {
+    const message = ["Influencer ID [1] not found"];
+    InfluencerService().detail.mockRejectedValue(new NotInfluencerError(1));
+    const response = await request(cookMenuRouter).get("/influencers/1");
+    expect(response.status).toBe(400);
+    expect(response.body.errors.developerMessage).toEqual(message);
+  });
+  test("異常系: detailが異常終了", async () => {
+    const message = ["ユニットテスト用エラー"];
     InfluencerService().detail.mockRejectedValue(new Error("ユニットテスト用エラー"));
     const response = await request(cookMenuRouter).get("/influencers/1");
     expect(response.status).toBe(500);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
-  test("異常系 validation check: パスパラメータが文字列", async () => {
-    const message = {
-      message: ["influencer id が正しくリクエストされていません"],
-    };
+  test("異常系: パスパラメータが文字列", async () => {
+    const message = ["influencerIdが正しくリクエストされていません"];
     const response = await request(cookMenuRouter).get("/influencers/a");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
-  test("異常系 validation check:  パスパラメータが文字と数値が混同", async () => {
-    const message = {
-      message: ["influencer id が正しくリクエストされていません"],
-    };
+  test("異常系: パスパラメータが文字と数値が混同", async () => {
+    const message = ["influencerIdが正しくリクエストされていません"];
     const response = await request(cookMenuRouter).get("/influencers/12ubva6");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
-  test("異常系 validation check: パスパラメータがない", async () => {
+  test("異常系: パスパラメータがない", async () => {
     const response = await request(cookMenuRouter).get("/influencers/");
     expect(response.status).toBe(404);
   });
 });
 
-describe("GET /top?metric=&limit=", () => {
-  test("正常系", async () => {
+describe("GET /influencers/top?metric=&limit=", () => {
+  test("正常系: limitが0", async () => {
+    const influencerData = {};
+    const responceData = { influencers: influencerData };
+    InfluencerService().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes&limit=0");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(responceData);
+  });
+  test("正常系: limitが1", async () => {
     const influencerData = {
       No: 1,
       likes: "551.7500",
@@ -97,61 +108,80 @@ describe("GET /top?metric=&limit=", () => {
       influencers: influencerData,
     };
     InfluencerService().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
-    const response = await request(cookMenuRouter).get("/top?metric=likes&limit=1");
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes&limit=1");
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
-  test("正常系: limitが0", async () => {
+  test("正常系: limitが100", async () => {
     const influencerData = {};
     const responceData = { influencers: influencerData };
     InfluencerService().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
-    const response = await request(cookMenuRouter).get("/top?metric=likes&limit=0");
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes&limit=100");
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
   test("異常系: getTopInfluencersByMetricが異常終了", async () => {
-    const message = { message: "処理に失敗しました" };
+    const message = ["ユニットテスト用エラー"];
     InfluencerService().getTopInfluencersByMetric.mockRejectedValue(
       new Error("ユニットテスト用エラー"),
     );
-    const response = await request(cookMenuRouter).get("/top?metric=likes&limit=1");
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes&limit=1");
     expect(response.status).toBe(500);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
+  });
+  test("異常系: getTopInfluencersByMetricが異常終了", async () => {
+    const message = ["ユニットテスト用エラー"];
+    InfluencerService().getTopInfluencersByMetric.mockRejectedValue(
+      new Error("ユニットテスト用エラー"),
+    );
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=comments&limit=1");
+    expect(response.status).toBe(500);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: metricがlikes or commentsじゃない", async () => {
-    const message = { message: ["metricが正しくありません"] };
-    const response = await request(cookMenuRouter).get("/top?metric=likess&limit=1");
+    const message = ["metricが正しくリクエストされていません"];
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likess&limit=1");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: metricがリクエストされない", async () => {
-    const message = { message: ["metricが正しくありません"] };
-    const response = await request(cookMenuRouter).get("/top?limit=1");
+    const message = ["metricがリクエストされていません", "metricが正しくリクエストされていません"];
+    const response = await request(cookMenuRouter).get("/influencers-top?limit=1");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitが文字", async () => {
-    const message = { message: ["limitが正しくリクエストされていません"] };
-    const response = await request(cookMenuRouter).get("/top?metric=likes&limit=a");
+    const message = ["limitが正しくリクエストされていません"];
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes&limit=a");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitが文字と数値", async () => {
-    const message = { message: ["limitが正しくリクエストされていません"] };
-    const response = await request(cookMenuRouter).get("/top?metric=likes&limit=a2837wbu");
+    const message = ["limitが正しくリクエストされていません"];
+    const response = await request(cookMenuRouter).get(
+      "/influencers-top?metric=likes&limit=a2837wbu",
+    );
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitがリクエストされない", async () => {
-    const message = { message: ["limitがリクエストされていません"] };
-    const response = await request(cookMenuRouter).get("/top?metric=like");
+    const message = ["limitがリクエストされていません", "limitが正しくリクエストされていません"];
+    const response = await request(cookMenuRouter).get("/influencers-top?metric=likes");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
 });
 
 describe("GET /influencers/analysis/top-nouns?limit=", () => {
-  test("正常系", async () => {
+  test("正常系: limitが0", async () => {
+    const influencerData = [{ influencer_id: "2", wordCount: [] }];
+    const responceData = { influencers: influencerData };
+    InfluencerService().getTopNouns.mockResolvedValueOnce(influencerData);
+    const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns?limit=0");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(responceData);
+  });
+  test("正常系: limitが1", async () => {
     const influencerData = [{ influencer_id: "2", wordCount: [{ "#": 56 }] }];
     const responceData = {
       influencers: influencerData,
@@ -161,39 +191,39 @@ describe("GET /influencers/analysis/top-nouns?limit=", () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
-  test("正常系: limitが0", async () => {
+  test("正常系: limitが100", async () => {
     const influencerData = [{ influencer_id: "2", wordCount: [] }];
     const responceData = { influencers: influencerData };
     InfluencerService().getTopNouns.mockResolvedValueOnce(influencerData);
-    const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns?limit=0");
+    const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns?limit=100");
     expect(response.status).toBe(200);
     expect(response.body).toEqual(responceData);
   });
   test("異常系: getTopNounsが異常終了", async () => {
-    const message = { message: "処理に失敗しました" };
+    const message = ["ユニットテスト用エラー"];
     InfluencerService().getTopNouns.mockRejectedValue(new Error("ユニットテスト用エラー"));
     const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns?limit=1");
     expect(response.status).toBe(500);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitが文字", async () => {
-    const message = { message: ["limitが正しくリクエストされていません"] };
+    const message = ["limitが正しくリクエストされていません"];
     const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns?limit=a");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitが文字と数値", async () => {
-    const message = { message: ["limitが正しくリクエストされていません"] };
+    const message = ["limitが正しくリクエストされていません"];
     const response = await request(cookMenuRouter).get(
       "/influencers/analysis/top-nouns?limit=29837bbwyiu",
     );
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
   test("異常系: limitがリクエストされない", async () => {
-    const message = { message: ["limitがリクエストされていません"] };
+    const message = ["limitがリクエストされていません", "limitが正しくリクエストされていません"];
     const response = await request(cookMenuRouter).get("/influencers/analysis/top-nouns");
     expect(response.status).toBe(400);
-    expect(response.body).toEqual(message);
+    expect(response.body.errors.developerMessage).toEqual(message);
   });
 });

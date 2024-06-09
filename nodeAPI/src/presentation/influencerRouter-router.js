@@ -5,25 +5,27 @@ const InfluencerService = require("../application/influencer-service.js");
 const influencerRouter = Router();
 const influencerService = new InfluencerService();
 
-const ERROR_MESSAGES = {
-  validationError: "バリデーションエラー",
-  processingError: "インフルエンサー情報取得処理に失敗しました",
-};
-
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorMessages = errors.errors.map((value) => {
       return value.msg;
     });
-    return res.status(400).json({ message: errorMessages });
+    const errorInfo = {
+      developerMessage: errorMessages,
+      userMessage: "リクエスト内容が正しくありませんでした",
+    };
+    return res.status(400).json({ errors: errorInfo });
   }
   next();
 };
 
+/**
+ * インフルエンサidから平均いいね数、平均コメント数を JSON 形式で返却
+ */
 influencerRouter.get(
   "/influencers/:id",
-  param("id").isNumeric().withMessage("influencer id が正しくリクエストされていません"),
+  param("id").isNumeric().withMessage("influencerIdが正しくリクエストされていません"),
   validateRequest,
   async (req, res) => {
     try {
@@ -32,18 +34,30 @@ influencerRouter.get(
       res.status(200).json({ influencer: result });
     } catch (err) {
       console.log(err);
-      res.status(500).json({ message: ERROR_MESSAGES.processingError });
+      const errorStatus = err.name === "NotInfluencerError" ? 400 : 500;
+      const userErroMessage =
+        err.name === "NotInfluencerError"
+          ? `インフルエンサーID「${req.params.id}」は存在しませんでした`
+          : `インフルエンサーID「${req.params.id}」の情報取得処理に失敗しました`;
+      const errorInfo = {
+        developerMessage: [err.message],
+        userMessage: userErroMessage,
+      };
+      res.status(errorStatus).json({ errors: errorInfo });
     }
   },
 );
 
+/**
+ * 平均いいね数 or 平均コメント数(metric に設定した項目)が多いインフルエンサー上位N件(limit 設定した数)をJSON形式で返却
+ */
 influencerRouter.get(
-  "/top",
+  "/influencers-top",
   query("metric")
     .notEmpty()
     .withMessage("metricがリクエストされていません")
     .isIn(["likes", "comments"])
-    .withMessage("metricが正しくありません"),
+    .withMessage("metricが正しくリクエストされていません"),
   query("limit")
     .notEmpty()
     .withMessage("limitがリクエストされていません")
@@ -57,11 +71,19 @@ influencerRouter.get(
       res.status(200).json({ influencers: result });
     } catch (err) {
       console.log(err);
-      res.status(500).json("処理に失敗しました");
+      const querryKind = req.query.metric === "likes" ? "いいね数" : "コメント数";
+      const errorInfo = {
+        developerMessage: [err.message],
+        userMessage: `上位「${req.query.limit}」人の「${querryKind}」の情報取得処理に失敗しました`,
+      };
+      res.status(500).json({ errors: errorInfo });
     }
   },
 );
 
+/**
+ * インフルエンサid毎に、投稿したデータから名詞を抽出して使用回数を集計し、上位N件(limit 設定した数)JSON 形式で返却
+ */
 influencerRouter.get(
   "/influencers/analysis/top-nouns",
   query("limit")
@@ -77,7 +99,11 @@ influencerRouter.get(
       res.status(200).json({ influencers: result });
     } catch (err) {
       console.log(err);
-      res.status(500).json("処理に失敗しました");
+      const errorInfo = {
+        developerMessage: [err.message],
+        userMessage: `投稿データの名詞数「${req.query.limit}」の情報取得処理に失敗しました`,
+      };
+      res.status(500).json({ errors: errorInfo });
     }
   },
 );

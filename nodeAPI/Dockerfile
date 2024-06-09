@@ -1,5 +1,5 @@
 # ベースイメージを指定
-FROM node:alpine
+FROM node:22-alpine
 
 # ファイルのコピー先のディレクトリまで移動する
 WORKDIR /usr/app

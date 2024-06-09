@@ -1,7 +1,3 @@
-/**
- * このファイルはフォルダ内のCSVデータをRDBに保存する機能が書かれています。
- */
-
 const fs = require("fs");
 const { parse } = require("csv-parse");
 const mysql = require("mysql2/promise");
@@ -30,13 +26,14 @@ async function main() {
     console.log("データベースへの登録が完了しました");
 
     dbConnection.end();
-  } catch (error) {
-    console.error("エラーが発生しました:", error);
+  } catch (err) {
+    console.error("エラーが発生しました:", err);
   }
 }
 
 async function readCSV() {
   return new Promise((resolve, reject) => {
+    // NOTE:CSVファイルの取得方法によって処理を変更してください
     const readStream = fs.createReadStream(
       "./t_influencer_posts_202401121334.csv"
     );
