@@ -68,4 +68,26 @@ influencerRouter.get(
   }
 );
 
+influencerRouter.get(
+  "/influencers/analysis/top-nouns",
+  query("limit")
+    .notEmpty()
+    .withMessage("limitがリクエストされていません")
+    .isNumeric()
+    .withMessage("limitが正しくリクエストされていません"),
+  validateRequest,
+  async (req, res) => {
+    try {
+      console.log("リクエストパラメーター：", req.query);
+      const result = await influencerService.getTopNouns(
+        parseInt(req.query.limit, 10)
+      );
+      res.status(200).json({ influencers: result });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json("処理に失敗しました");
+    }
+  }
+);
+
 module.exports = influencerRouter;
