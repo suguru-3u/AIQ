@@ -15,9 +15,7 @@ class InfluencerService {
   }
 
   async getTopInfluencersByMetric(query) {
-    const res = await this.influencerDatasource.getTopInfluencersByMetric(
-      query
-    );
+    const res = await this.influencerDatasource.getTopInfluencersByMetric(query);
     return res.map((value, index) => ({
       No: index + 1,
       influencerId: value.influencer_id,
@@ -79,20 +77,18 @@ class InfluencerService {
   }
 
   formatTopNounsResult(aggregatedData, limit) {
-    const result = Object.entries(aggregatedData).map(
-      ([influencerId, wordCounts]) => {
-        const sortedWordCounts = Object.entries(wordCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, parseInt(limit));
-        const wordCount = sortedWordCounts.map(([word, count]) => ({
-          [word]: count,
-        }));
-        return {
-          influencer_id: influencerId,
-          wordCount,
-        };
-      }
-    );
+    const result = Object.entries(aggregatedData).map(([influencerId, wordCounts]) => {
+      const sortedWordCounts = Object.entries(wordCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, parseInt(limit));
+      const wordCount = sortedWordCounts.map(([word, count]) => ({
+        [word]: count,
+      }));
+      return {
+        influencer_id: influencerId,
+        wordCount,
+      };
+    });
     return result;
   }
 }

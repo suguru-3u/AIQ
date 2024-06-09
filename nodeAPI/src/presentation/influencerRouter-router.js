@@ -23,22 +23,18 @@ const validateRequest = (req, res, next) => {
 
 influencerRouter.get(
   "/influencers/:id",
-  param("id")
-    .isNumeric()
-    .withMessage("influencer id が正しくリクエストされていません"),
+  param("id").isNumeric().withMessage("influencer id が正しくリクエストされていません"),
   validateRequest,
   async (req, res) => {
     try {
       console.log("リクエストパラメーター：", req.params.id);
-      const result = await influencerService.detail(
-        parseInt(req.params.id, 10)
-      );
+      const result = await influencerService.detail(parseInt(req.params.id, 10));
       res.status(200).json({ influencer: result });
     } catch (err) {
       console.log(err);
       res.status(500).json({ message: ERROR_MESSAGES.processingError });
     }
-  }
+  },
 );
 
 influencerRouter.get(
@@ -57,15 +53,13 @@ influencerRouter.get(
   async (req, res) => {
     try {
       console.log("リクエストクエリ：", req.query);
-      const result = await influencerService.getTopInfluencersByMetric(
-        req.query
-      );
+      const result = await influencerService.getTopInfluencersByMetric(req.query);
       res.status(200).json({ influencers: result });
     } catch (err) {
       console.log(err);
       res.status(500).json("処理に失敗しました");
     }
-  }
+  },
 );
 
 influencerRouter.get(
@@ -79,15 +73,13 @@ influencerRouter.get(
   async (req, res) => {
     try {
       console.log("リクエストパラメーター：", req.query);
-      const result = await influencerService.getTopNouns(
-        parseInt(req.query.limit, 10)
-      );
+      const result = await influencerService.getTopNouns(parseInt(req.query.limit, 10));
       res.status(200).json({ influencers: result });
     } catch (err) {
       console.log(err);
       res.status(500).json("処理に失敗しました");
     }
-  }
+  },
 );
 
 module.exports = influencerRouter;

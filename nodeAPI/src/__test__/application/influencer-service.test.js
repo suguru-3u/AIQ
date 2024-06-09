@@ -69,14 +69,10 @@ describe("getTopInfluencersByMetric", () => {
       },
     ];
     // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(
-      influencerData
-    );
+    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
 
     const influencerService = new InfluencerService();
-    const response = await influencerService.getTopInfluencersByMetric(
-      requestQuery
-    );
+    const response = await influencerService.getTopInfluencersByMetric(requestQuery);
     expect(response).toEqual(responseData);
   });
   test("正常系: metricがcomments", async () => {
@@ -98,14 +94,10 @@ describe("getTopInfluencersByMetric", () => {
       },
     ];
     // InfluencerDatasourceモジュールのdetail関数をモック化し、適切な値を返すように設定
-    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(
-      influencerData
-    );
+    InfluencerDatasource().getTopInfluencersByMetric.mockResolvedValueOnce(influencerData);
 
     const influencerService = new InfluencerService();
-    const response = await influencerService.getTopInfluencersByMetric(
-      requestQuery
-    );
+    const response = await influencerService.getTopInfluencersByMetric(requestQuery);
     expect(response).toEqual(responseData);
   });
 });

@@ -18,10 +18,7 @@ class InfluencerDatasource {
         WHERE influencer_id = ?
         GROUP BY influencer_id;
       `;
-      const [results] = await this.#rdbClientFactory.rdbClient.query(
-        selectInfluencerQuery,
-        [id]
-      );
+      const [results] = await this.#rdbClientFactory.rdbClient.query(selectInfluencerQuery, [id]);
       console.log("データの取得が完了しました");
       return results;
     } catch (error) {
@@ -42,10 +39,10 @@ class InfluencerDatasource {
         GROUP BY INFLUENCER_ID
         ORDER BY metric desc limit ?;
       `;
-      const [results] = await this.#rdbClientFactory.rdbClient.query(
-        insertIntoPostQuery,
-        [query.metric, parseInt(query.limit, 10)]
-      );
+      const [results] = await this.#rdbClientFactory.rdbClient.query(insertIntoPostQuery, [
+        query.metric,
+        parseInt(query.limit, 10),
+      ]);
       console.log("データの取得が完了しました");
 
       return results;
@@ -64,9 +61,7 @@ class InfluencerDatasource {
         select influencer_id , body as text
         from posts
         order by INFLUENCER_ID;`;
-      const [results] = await this.#rdbClientFactory.rdbClient.query(
-        getTextQuery
-      );
+      const [results] = await this.#rdbClientFactory.rdbClient.query(getTextQuery);
       console.log("データの取得が完了しました");
 
       return results;
