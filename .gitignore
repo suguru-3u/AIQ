@@ -6,3 +6,6 @@
 
 # cliのライブラリ
 /*/node_modules/
+
+# ユニットテストのレポート
+/nodeAPI/coverage
