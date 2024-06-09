@@ -2,8 +2,6 @@ const InfluencerDatasource = require("../infrastructure/datasource/influencer-da
 const NotInfluencerError = require("../error/not-influencer-error.js");
 
 class InfluencerService {
-  #dataNotIndexNum = 0;
-
   influencerDatasource;
 
   constructor() {
@@ -13,9 +11,22 @@ class InfluencerService {
 
   async detail(id) {
     const result = await this.influencerDatasource.detail(id);
-    if (result.length === this.#dataNotIndexNum)
-      throw new NotInfluencerError(id);
+    if (result.length === 0) throw new NotInfluencerError(id);
     return result.pop();
+  }
+
+  async getTopInfluencersByMetric(query) {
+    const res = await this.influencerDatasource.getTopInfluencersByMetric(
+      query
+    );
+    const newArray = res.map((value, index) => {
+      return {
+        No: index + 1,
+        influencerId: value.influencer_id,
+        [query.metric]: value.metric,
+      };
+    });
+    return newArray;
   }
 }
 
