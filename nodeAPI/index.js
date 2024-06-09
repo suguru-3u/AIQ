@@ -1,27 +1,29 @@
 const express = require("express");
-const influencerRouter = require("./presentation/influencerRouter-router.js");
+const influencerRouter = require("./src/presentation/influencerRouter-router.js");
 
 const app = express();
-// const port = process.env.LOCAL_API_PORT;
-const port = 3000;
+const port = process.env.LOCAL_API_PORT;
 
-// JSONデータを扱う為に必要な設定
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1", influencerRouter);
 
-app.get("*", (req, res) => {
-  res.status(404).send("存在しないURLです");
+const errorInfo = {
+  developerMessage: "存在しないURLです",
+  userMessage: "存在しないURLです",
+};
+
+app.get("*", (_req, res) => {
+  res.status(404).json({ errors: errorInfo });
 });
-app.post("*", (req, res) => {
-  res.status(404).send("存在しないURLです");
+app.post("*", (_req, res) => {
+  res.status(404).json({ errors: errorInfo });
 });
-app.put("*", (req, res) => {
-  res.status(404).send("存在しないURLです");
+app.put("*", (_req, res) => {
+  res.status(404).json({ errors: errorInfo });
 });
-app.delete("*", (req, res) => {
-  res.status(404).send("存在しないURLです");
+app.delete("*", (_req, res) => {
+  res.status(404).json({ errors: errorInfo });
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port, () => console.log(`App listening on port ${port}!`));

@@ -46,10 +46,7 @@ class RDBClientFactory {
         await this.rdbClient.end();
         console.log("Database connection closed successfully");
       } catch (error) {
-        console.error(
-          "Error occurred while closing the database connection:",
-          error
-        );
+        console.error("Error occurred while closing the database connection:", error);
         throw new Error("Failed to close the database connection");
       } finally {
         this.rdbClient = null;
