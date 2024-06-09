@@ -1,5 +1,5 @@
 const Router = require("express");
-const { param, validationResult } = require("express-validator");
+const { param, validationResult, query } = require("express-validator");
 const InfluencerService = require("../application/influencer-service.js");
 
 const influencerRouter = Router();
@@ -25,7 +25,7 @@ influencerRouter.get(
   "/influencers/:id",
   param("id")
     .isNumeric()
-    .withMessage("influencer id が正しく設定されていません"),
+    .withMessage("influencer id が正しくリクエストされていません"),
   validateRequest,
   async (req, res) => {
     try {
@@ -37,6 +37,33 @@ influencerRouter.get(
     } catch (err) {
       console.log(err);
       res.status(500).json({ message: ERROR_MESSAGES.processingError });
+    }
+  }
+);
+
+influencerRouter.get(
+  "/top",
+  query("metric")
+    .notEmpty()
+    .withMessage("metricがリクエストされていません")
+    .isIn(["likes", "comments"])
+    .withMessage("metricが正しくありません"),
+  query("limit")
+    .notEmpty()
+    .withMessage("limitがリクエストされていません")
+    .isNumeric()
+    .withMessage("limitが正しくリクエストされていません"),
+  validateRequest,
+  async (req, res) => {
+    try {
+      console.log("リクエストクエリ：", req.query);
+      const result = await influencerService.getTopInfluencersByMetric(
+        req.query
+      );
+      res.status(200).json({ influencers: result });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json("処理に失敗しました");
     }
   }
 );
